@@ -6,10 +6,14 @@ public class LeaderboardController : MonoBehaviour
     [SerializeField] private PropertiesData properties;
     [SerializeField] private PlayerLineItem playerLinePrefab;
     [SerializeField] private Transform playerLinesContainer;
+    [SerializeField] private Animator leaderboardAnimator;
+    [SerializeField] private UIAdaptation uiAdaptation;
 
     private string[] _fileNames;
     private int _currentFileNum;
     private readonly List<PlayerLineItem> _playerLines = new();
+
+    const string LeaderBoardAnimationKey = "open";
 
     private void Start()
     {
@@ -34,6 +38,13 @@ public class LeaderboardController : MonoBehaviour
 
     private void UpdateLeaderboard(LeaderboardData leaderboardData)
     {
+        foreach (var line in _playerLines)
+        {
+            Destroy(line.gameObject);
+        }
+
+        _playerLines.Clear();
+
         foreach (var ranking in leaderboardData.ranking)
         {
             var playerLine = Instantiate(playerLinePrefab, playerLinesContainer);
@@ -43,6 +54,9 @@ public class LeaderboardController : MonoBehaviour
             playerLine.OnPress += OnPressPlayerLine;
             _playerLines.Add(playerLine);
         }
+
+        leaderboardAnimator.SetBool(LeaderBoardAnimationKey, true);
+        StartCoroutine(uiAdaptation.UIUpdate());
     }
 
     private void OnPressPlayerLine()
@@ -55,11 +69,6 @@ public class LeaderboardController : MonoBehaviour
 
     public void CloseLeaderboard()
     {
-        foreach (var line in _playerLines)
-        {
-            Destroy(line.gameObject);
-        }
-
-        _playerLines.Clear();
+        leaderboardAnimator.SetBool(LeaderBoardAnimationKey, false);
     }
 }
